@@ -8,6 +8,9 @@ $tabs = [
     'seasons' => __('Seasons', 'trp'),
     'events' => __('Events', 'trp'),
     'participants' => __('Participants', 'trp'),
+    'categories' => __('Categories', 'trp'),
+    'points' => __('Points table', 'trp'),
+    'settings' => __('Season settings', 'trp'),
 ];
 ?>
 <div class="wrap trp-admin">
@@ -79,6 +82,59 @@ $tabs = [
         <h2><?php esc_html_e('Participants list', 'trp'); ?></h2>
         <table class="widefat striped"><thead><tr><th>ID</th><th><?php esc_html_e('Last name', 'trp'); ?></th><th><?php esc_html_e('First name', 'trp'); ?></th><th><?php esc_html_e('City', 'trp'); ?></th><th><?php esc_html_e('License', 'trp'); ?></th></tr></thead><tbody>
         <?php foreach ($participants as $participant) : ?><tr><td><?php echo esc_html($participant->id); ?></td><td><?php echo esc_html($participant->last_name); ?></td><td><?php echo esc_html($participant->first_name); ?></td><td><?php echo esc_html($participant->city); ?></td><td><?php echo esc_html($participant->license_number); ?></td></tr><?php endforeach; ?>
+        </tbody></table>
+
+    <?php elseif ($tab === 'categories') : ?>
+        <h2><?php esc_html_e('Add category', 'trp'); ?></h2>
+        <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+            <input type="hidden" name="action" value="trp_save_category">
+            <?php wp_nonce_field('trp_save_category'); ?>
+            <table class="form-table" role="presentation">
+                <tr><th><label for="category_season"><?php esc_html_e('Season', 'trp'); ?></label></th><td><select id="category_season" name="season_id" required><?php foreach ($seasons as $season) : ?><option value="<?php echo esc_attr($season->id); ?>"><?php echo esc_html($season->name); ?></option><?php endforeach; ?></select></td></tr>
+                <tr><th><label for="category_name"><?php esc_html_e('Category name', 'trp'); ?></label></th><td><input type="text" id="category_name" name="name" required></td></tr>
+            </table>
+            <p><button class="button button-primary" type="submit"><?php esc_html_e('Save category', 'trp'); ?></button></p>
+        </form>
+
+        <h2><?php esc_html_e('Categories list', 'trp'); ?></h2>
+        <table class="widefat striped"><thead><tr><th>ID</th><th><?php esc_html_e('Season ID', 'trp'); ?></th><th><?php esc_html_e('Name', 'trp'); ?></th><th><?php esc_html_e('Slug', 'trp'); ?></th></tr></thead><tbody>
+        <?php foreach ($categories as $category) : ?><tr><td><?php echo esc_html($category->id); ?></td><td><?php echo esc_html($category->season_id); ?></td><td><?php echo esc_html($category->name); ?></td><td><?php echo esc_html($category->slug); ?></td></tr><?php endforeach; ?>
+        </tbody></table>
+
+    <?php elseif ($tab === 'points') : ?>
+        <h2><?php esc_html_e('Add or update points', 'trp'); ?></h2>
+        <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+            <input type="hidden" name="action" value="trp_save_points">
+            <?php wp_nonce_field('trp_save_points'); ?>
+            <table class="form-table" role="presentation">
+                <tr><th><label for="points_season"><?php esc_html_e('Season', 'trp'); ?></label></th><td><select id="points_season" name="season_id" required><?php foreach ($seasons as $season) : ?><option value="<?php echo esc_attr($season->id); ?>"><?php echo esc_html($season->name); ?></option><?php endforeach; ?></select></td></tr>
+                <tr><th><label for="place_number"><?php esc_html_e('Place', 'trp'); ?></label></th><td><input type="number" id="place_number" name="place_number" min="1" required></td></tr>
+                <tr><th><label for="points"><?php esc_html_e('Points', 'trp'); ?></label></th><td><input type="number" id="points" name="points" required></td></tr>
+            </table>
+            <p><button class="button button-primary" type="submit"><?php esc_html_e('Save points', 'trp'); ?></button></p>
+        </form>
+
+        <h2><?php esc_html_e('Points table', 'trp'); ?></h2>
+        <table class="widefat striped"><thead><tr><th>ID</th><th><?php esc_html_e('Season ID', 'trp'); ?></th><th><?php esc_html_e('Place', 'trp'); ?></th><th><?php esc_html_e('Points', 'trp'); ?></th></tr></thead><tbody>
+        <?php foreach ($points_rows as $point) : ?><tr><td><?php echo esc_html($point->id); ?></td><td><?php echo esc_html($point->season_id); ?></td><td><?php echo esc_html($point->place_number); ?></td><td><?php echo esc_html($point->points); ?></td></tr><?php endforeach; ?>
+        </tbody></table>
+
+    <?php elseif ($tab === 'settings') : ?>
+        <h2><?php esc_html_e('Season scoring settings', 'trp'); ?></h2>
+        <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+            <input type="hidden" name="action" value="trp_save_season_settings">
+            <?php wp_nonce_field('trp_save_season_settings'); ?>
+            <table class="form-table" role="presentation">
+                <tr><th><label for="settings_season"><?php esc_html_e('Season', 'trp'); ?></label></th><td><select id="settings_season" name="season_id" required><?php foreach ($seasons as $season) : ?><option value="<?php echo esc_attr($season->id); ?>"><?php echo esc_html($season->name); ?></option><?php endforeach; ?></select></td></tr>
+                <tr><th><label for="scoring_type"><?php esc_html_e('Scoring type', 'trp'); ?></label></th><td><select id="scoring_type" name="scoring_type"><option value="all">All events</option><option value="best_n">Best N events</option></select></td></tr>
+                <tr><th><label for="best_events_count"><?php esc_html_e('Best events count (for best_n)', 'trp'); ?></label></th><td><input type="number" id="best_events_count" name="best_events_count" min="0" value="0"></td></tr>
+            </table>
+            <p><button class="button button-primary" type="submit"><?php esc_html_e('Save settings', 'trp'); ?></button></p>
+        </form>
+
+        <h2><?php esc_html_e('Current season settings', 'trp'); ?></h2>
+        <table class="widefat striped"><thead><tr><th><?php esc_html_e('Season ID', 'trp'); ?></th><th><?php esc_html_e('Scoring type', 'trp'); ?></th><th><?php esc_html_e('Best events count', 'trp'); ?></th></tr></thead><tbody>
+        <?php foreach ($season_settings as $setting) : ?><tr><td><?php echo esc_html($setting->season_id); ?></td><td><?php echo esc_html($setting->scoring_type); ?></td><td><?php echo esc_html($setting->best_events_count); ?></td></tr><?php endforeach; ?>
         </tbody></table>
 
     <?php else : ?>

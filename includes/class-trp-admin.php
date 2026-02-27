@@ -15,6 +15,9 @@ class TRP_Admin
         add_action('admin_post_trp_save_season', [__CLASS__, 'save_season']);
         add_action('admin_post_trp_save_event', [__CLASS__, 'save_event']);
         add_action('admin_post_trp_save_participant', [__CLASS__, 'save_participant']);
+        add_action('admin_post_trp_save_category', [__CLASS__, 'save_category']);
+        add_action('admin_post_trp_save_points', [__CLASS__, 'save_points']);
+        add_action('admin_post_trp_save_season_settings', [__CLASS__, 'save_season_settings']);
     }
 
     public static function enqueue_assets($hook)
@@ -46,7 +49,7 @@ class TRP_Admin
         }
 
         $tab = isset($_GET['tab']) ? sanitize_key($_GET['tab']) : 'results';
-        $allowed_tabs = ['results', 'seasons', 'events', 'participants'];
+        $allowed_tabs = ['results', 'seasons', 'events', 'participants', 'categories', 'points', 'settings'];
         if (!in_array($tab, $allowed_tabs, true)) {
             $tab = 'results';
         }
@@ -56,7 +59,9 @@ class TRP_Admin
         $seasons = $wpdb->get_results('SELECT * FROM ' . TRP_DB::table('seasons') . ' ORDER BY season_year DESC, id DESC');
         $events = $wpdb->get_results('SELECT * FROM ' . TRP_DB::table('events') . ' ORDER BY id DESC');
         $participants = $wpdb->get_results('SELECT * FROM ' . TRP_DB::table('participants') . ' ORDER BY last_name ASC, first_name ASC');
-        $categories = $wpdb->get_results('SELECT id, name FROM ' . TRP_DB::table('categories') . ' ORDER BY name ASC');
+        $categories = $wpdb->get_results('SELECT * FROM ' . TRP_DB::table('categories') . ' ORDER BY season_id DESC, name ASC');
+        $points_rows = $wpdb->get_results('SELECT * FROM ' . TRP_DB::table('points') . ' ORDER BY season_id DESC, place_number ASC');
+        $season_settings = $wpdb->get_results('SELECT * FROM ' . TRP_DB::table('season_settings') . ' ORDER BY season_id DESC');
         $results = $wpdb->get_results('SELECT * FROM ' . TRP_DB::table('results') . ' ORDER BY id DESC LIMIT 100');
 
         include TRP_PLUGIN_PATH . 'includes/views/admin-page.php';
@@ -151,6 +156,130 @@ class TRP_Admin
         }
 
         wp_safe_redirect(admin_url('admin.php?page=trp-dashboard&tab=participants&saved=1'));
+        exit;
+    }
+
+    public static function save_category()
+    {
+        if (!current_user_can('trp_manage_data')) {
+            wp_die(__('Insufficient permissions', 'trp'));
+        }
+        check_admin_referer('trp_save_category');
+
+        $season_id = isset($_POST['season_id']) ? absint($_POST['season_id']) : 0;
+        $name = isset($_POST['name']) ? sanitize_text_field($_POST['name']) : '';
+
+        if ($season_id && $name) {
+            global $wpdb;
+            $slug = sanitize_title($name);
+            $wpdb->insert(
+                TRP_DB::table('categories'),
+                [
+                    'season_id' => $season_id,
+                    'name' => $name,
+                    'slug' => $slug,
+                ],
+                ['%d', '%s', '%s']
+            );
+        }
+
+        wp_safe_redirect(admin_url('admin.php?page=trp-dashboard&tab=categories&saved=1'));
+        exit;
+    }
+
+    public static function save_points()
+    {
+        if (!current_user_can('trp_manage_data')) {
+            wp_die(__('Insufficient permissions', 'trp'));
+        }
+        check_admin_referer('trp_save_points');
+
+        $season_id = isset($_POST['season_id']) ? absint($_POST['season_id']) : 0;
+        $place_number = isset($_POST['place_number']) ? absint($_POST['place_number']) : 0;
+        $points = isset($_POST['points']) ? intval($_POST['points']) : 0;
+
+        if ($season_id && $place_number) {
+            global $wpdb;
+            $table = TRP_DB::table('points');
+            $existing_id = $wpdb->get_var($wpdb->prepare(
+                "SELECT id FROM {$table} WHERE season_id = %d AND place_number = %d",
+                $season_id,
+                $place_number
+            ));
+
+            if ($existing_id) {
+                $wpdb->update(
+                    $table,
+                    ['points' => $points],
+                    ['id' => absint($existing_id)],
+                    ['%d'],
+                    ['%d']
+                );
+            } else {
+                $wpdb->insert(
+                    $table,
+                    [
+                        'season_id' => $season_id,
+                        'place_number' => $place_number,
+                        'points' => $points,
+                    ],
+                    ['%d', '%d', '%d']
+                );
+            }
+        }
+
+        wp_safe_redirect(admin_url('admin.php?page=trp-dashboard&tab=points&saved=1'));
+        exit;
+    }
+
+    public static function save_season_settings()
+    {
+        if (!current_user_can('trp_manage_data')) {
+            wp_die(__('Insufficient permissions', 'trp'));
+        }
+        check_admin_referer('trp_save_season_settings');
+
+        $season_id = isset($_POST['season_id']) ? absint($_POST['season_id']) : 0;
+        $scoring_type = isset($_POST['scoring_type']) ? sanitize_key($_POST['scoring_type']) : 'all';
+        $best_events_count = isset($_POST['best_events_count']) ? absint($_POST['best_events_count']) : 0;
+
+        if ($season_id) {
+            if (!in_array($scoring_type, ['all', 'best_n'], true)) {
+                $scoring_type = 'all';
+            }
+
+            global $wpdb;
+            $table = TRP_DB::table('season_settings');
+            $existing = $wpdb->get_var($wpdb->prepare(
+                "SELECT season_id FROM {$table} WHERE season_id = %d",
+                $season_id
+            ));
+
+            if ($existing) {
+                $wpdb->update(
+                    $table,
+                    [
+                        'scoring_type' => $scoring_type,
+                        'best_events_count' => $best_events_count,
+                    ],
+                    ['season_id' => $season_id],
+                    ['%s', '%d'],
+                    ['%d']
+                );
+            } else {
+                $wpdb->insert(
+                    $table,
+                    [
+                        'season_id' => $season_id,
+                        'scoring_type' => $scoring_type,
+                        'best_events_count' => $best_events_count,
+                    ],
+                    ['%d', '%s', '%d']
+                );
+            }
+        }
+
+        wp_safe_redirect(admin_url('admin.php?page=trp-dashboard&tab=settings&saved=1'));
         exit;
     }
 
