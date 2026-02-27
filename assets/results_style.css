@@ -15,15 +15,62 @@
     --table-row-hover: rgb(30, 30, 28);
 }
 
-.results-container,
-.trp-shortcode-wrap {
+.results-container {
     margin: 30px 0;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
     background-color: var(--dark-bg);
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    padding: 12px;
+}
+
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: var(--dark-gray);
+    border-bottom: 2px solid var(--orange-amber);
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.season-filters,
+.class-filters-top3 {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.season-filter,
+.class-filter-top3 {
+    padding: 8px 12px;
+    background-color: var(--dark-gray);
+    border: 1px solid var(--medium-gray);
+    border-radius: 4px;
+    text-decoration: none;
+    color: var(--hero-title);
+    font-size: 14px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.season-filter:hover,
+.class-filter-top3:hover {
+    background-color: var(--medium-gray);
+    border-color: var(--light-gray);
+    color: var(--white);
+}
+
+.season-filter.active,
+.class-filter-top3.active {
+    background-color: var(--orange-amber);
+    color: var(--white);
+    border-color: var(--orange-amber);
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(215, 90, 0, 0.3);
 }
 
 .table-responsive {
@@ -48,7 +95,6 @@ table.delivery.results-table th {
     text-align: center;
     vertical-align: middle;
     font-size: 15px;
-    letter-spacing: 0.5px;
 }
 
 table.delivery.results-table td {
@@ -91,7 +137,17 @@ table.delivery.results-table td {
     border-right: 2px solid var(--orange-amber) !important;
 }
 
+.error {
+    color: #d63638;
+    text-align: center;
+    padding: 20px;
+}
+
 @media screen and (max-width: 768px) {
+    .results-header {
+        padding: 12px;
+    }
+
     table.delivery.results-table {
         font-size: 12px;
     }
