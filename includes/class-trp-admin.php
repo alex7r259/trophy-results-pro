@@ -20,6 +20,8 @@ class TRP_Admin
         add_action('admin_post_trp_save_season_settings', [__CLASS__, 'save_season_settings']);
         add_action('admin_post_trp_delete_row', [__CLASS__, 'delete_row']);
         add_action('admin_post_trp_update_result_status', [__CLASS__, 'update_result_status']);
+        add_action('admin_post_trp_update_season_status', [__CLASS__, 'update_season_status']);
+        add_action('admin_post_trp_update_event_status', [__CLASS__, 'update_event_status']);
     }
 
     public static function enqueue_assets($hook)
@@ -107,6 +109,61 @@ class TRP_Admin
         );
 
         wp_safe_redirect(admin_url('admin.php?page=trp-dashboard&tab=' . $map[$entity]['tab'] . '&deleted=1'));
+        exit;
+    }
+
+
+    public static function update_season_status()
+    {
+        if (!current_user_can('trp_manage_data')) {
+            wp_die(__('Insufficient permissions', 'trp'));
+        }
+
+        check_admin_referer('trp_update_season_status');
+
+        $season_id = isset($_POST['season_id']) ? absint($_POST['season_id']) : 0;
+        $status = isset($_POST['status']) ? sanitize_key($_POST['status']) : 'draft';
+        $allowed = ['draft', 'active', 'completed'];
+
+        if ($season_id && in_array($status, $allowed, true)) {
+            global $wpdb;
+            $wpdb->update(
+                TRP_DB::table('seasons'),
+                ['status' => $status],
+                ['id' => $season_id],
+                ['%s'],
+                ['%d']
+            );
+        }
+
+        wp_safe_redirect(admin_url('admin.php?page=trp-dashboard&tab=seasons&saved=1'));
+        exit;
+    }
+
+    public static function update_event_status()
+    {
+        if (!current_user_can('trp_manage_data')) {
+            wp_die(__('Insufficient permissions', 'trp'));
+        }
+
+        check_admin_referer('trp_update_event_status');
+
+        $event_id = isset($_POST['event_id']) ? absint($_POST['event_id']) : 0;
+        $status = isset($_POST['status']) ? sanitize_key($_POST['status']) : 'draft';
+        $allowed = ['draft', 'published', 'closed'];
+
+        if ($event_id && in_array($status, $allowed, true)) {
+            global $wpdb;
+            $wpdb->update(
+                TRP_DB::table('events'),
+                ['status' => $status],
+                ['id' => $event_id],
+                ['%s'],
+                ['%d']
+            );
+        }
+
+        wp_safe_redirect(admin_url('admin.php?page=trp-dashboard&tab=events&saved=1'));
         exit;
     }
 

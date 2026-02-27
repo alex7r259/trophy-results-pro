@@ -51,7 +51,19 @@ $delete_url = static function ($entity, $id) {
 
         <h2><?php esc_html_e('Seasons list', 'trp'); ?></h2>
         <table class="widefat striped"><thead><tr><th>ID</th><th><?php esc_html_e('Name', 'trp'); ?></th><th><?php esc_html_e('Year', 'trp'); ?></th><th><?php esc_html_e('Status', 'trp'); ?></th><th><?php esc_html_e('Actions', 'trp'); ?></th></tr></thead><tbody>
-        <?php foreach ($seasons as $season) : ?><tr><td><?php echo esc_html($season->id); ?></td><td><?php echo esc_html($season->name); ?></td><td><?php echo esc_html($season->season_year); ?></td><td><?php echo esc_html($season->status); ?></td><td><a class="button button-small button-link-delete" href="<?php echo esc_url($delete_url('seasons', $season->id)); ?>" onclick="return confirm('Delete season?');"><?php esc_html_e('Delete', 'trp'); ?></a></td></tr><?php endforeach; ?>
+        <?php foreach ($seasons as $season) : ?><tr><td><?php echo esc_html($season->id); ?></td><td><?php echo esc_html($season->name); ?></td><td><?php echo esc_html($season->season_year); ?></td><td>
+            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:flex;gap:6px;align-items:center;">
+                <input type="hidden" name="action" value="trp_update_season_status">
+                <input type="hidden" name="season_id" value="<?php echo esc_attr($season->id); ?>">
+                <?php wp_nonce_field('trp_update_season_status'); ?>
+                <select name="status">
+                    <option value="draft" <?php selected($season->status, 'draft'); ?>>Draft</option>
+                    <option value="active" <?php selected($season->status, 'active'); ?>>Active</option>
+                    <option value="completed" <?php selected($season->status, 'completed'); ?>>Completed</option>
+                </select>
+                <button class="button button-small" type="submit"><?php esc_html_e('Update', 'trp'); ?></button>
+            </form>
+        </td><td><a class="button button-small button-link-delete" href="<?php echo esc_url($delete_url('seasons', $season->id)); ?>" onclick="return confirm('Delete season?');"><?php esc_html_e('Delete', 'trp'); ?></a></td></tr><?php endforeach; ?>
         </tbody></table>
 
     <?php elseif ($tab === 'events') : ?>
@@ -72,7 +84,19 @@ $delete_url = static function ($entity, $id) {
 
         <h2><?php esc_html_e('Events list', 'trp'); ?></h2>
         <table class="widefat striped"><thead><tr><th>ID</th><th><?php esc_html_e('Season ID', 'trp'); ?></th><th><?php esc_html_e('Name', 'trp'); ?></th><th><?php esc_html_e('Stage', 'trp'); ?></th><th><?php esc_html_e('Status', 'trp'); ?></th><th><?php esc_html_e('Actions', 'trp'); ?></th></tr></thead><tbody>
-        <?php foreach ($events as $event) : ?><tr><td><?php echo esc_html($event->id); ?></td><td><?php echo esc_html($event->season_id); ?></td><td><?php echo esc_html($event->name); ?></td><td><?php echo esc_html($event->stage_number); ?></td><td><?php echo esc_html($event->status); ?></td><td><a class="button button-small button-link-delete" href="<?php echo esc_url($delete_url('events', $event->id)); ?>" onclick="return confirm('Delete event?');"><?php esc_html_e('Delete', 'trp'); ?></a></td></tr><?php endforeach; ?>
+        <?php foreach ($events as $event) : ?><tr><td><?php echo esc_html($event->id); ?></td><td><?php echo esc_html($event->season_id); ?></td><td><?php echo esc_html($event->name); ?></td><td><?php echo esc_html($event->stage_number); ?></td><td>
+            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:flex;gap:6px;align-items:center;">
+                <input type="hidden" name="action" value="trp_update_event_status">
+                <input type="hidden" name="event_id" value="<?php echo esc_attr($event->id); ?>">
+                <?php wp_nonce_field('trp_update_event_status'); ?>
+                <select name="status">
+                    <option value="draft" <?php selected($event->status, 'draft'); ?>>Draft</option>
+                    <option value="published" <?php selected($event->status, 'published'); ?>>Published</option>
+                    <option value="closed" <?php selected($event->status, 'closed'); ?>>Closed</option>
+                </select>
+                <button class="button button-small" type="submit"><?php esc_html_e('Update', 'trp'); ?></button>
+            </form>
+        </td><td><a class="button button-small button-link-delete" href="<?php echo esc_url($delete_url('events', $event->id)); ?>" onclick="return confirm('Delete event?');"><?php esc_html_e('Delete', 'trp'); ?></a></td></tr><?php endforeach; ?>
         </tbody></table>
 
     <?php elseif ($tab === 'participants') : ?>
