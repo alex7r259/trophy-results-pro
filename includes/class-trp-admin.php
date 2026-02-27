@@ -194,18 +194,13 @@ class TRP_Admin
             ));
 
             if ($result) {
-                $points = ($status === 'finish')
-                    ? TRP_Scoring::get_points_for_place((int) $result->season_id, (int) $result->place_number)
-                    : 0;
-
                 $wpdb->update(
                     $results_table,
                     [
                         'status' => $status,
-                        'points' => $points,
                     ],
                     ['id' => $result_id],
-                    ['%s', '%d'],
+                    ['%s'],
                     ['%d']
                 );
             }
@@ -465,7 +460,6 @@ class TRP_Admin
             $status = 'finish';
         }
 
-        $points = ($status === 'finish') ? TRP_Scoring::get_points_for_place($season_id, $place_number) : 0;
 
         global $wpdb;
         $wpdb->insert(
@@ -477,7 +471,6 @@ class TRP_Admin
                 'pilot_id'        => $pilot_id,
                 'co_driver_id'    => $co_driver_id ?: null,
                 'place_number'    => $place_number,
-                'points'          => $points,
                 'status'          => $status,
                 'time_seconds'    => $time_seconds ?: null,
                 'penalty_seconds' => $penalty_seconds,
@@ -485,7 +478,7 @@ class TRP_Admin
                 'start_number'    => $start_number,
                 'car_name'        => $car_name,
             ],
-            ['%d', '%d', '%d', '%d', '%d', '%d', '%d', '%s', '%d', '%d', '%s', '%s', '%s']
+            ['%d', '%d', '%d', '%d', '%d', '%d', '%s', '%d', '%d', '%s', '%s', '%s']
         );
 
         wp_safe_redirect(admin_url('admin.php?page=trp-dashboard&tab=results&saved=1'));

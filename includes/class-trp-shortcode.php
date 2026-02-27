@@ -46,10 +46,11 @@ class TRP_Shortcode
         }
 
         $results = $wpdb->get_results($wpdb->prepare(
-            "SELECT r.*, p.last_name AS pilot_last_name, c.last_name AS codriver_last_name
+            "SELECT r.*, COALESCE(pt.points,0) AS base_points_ref, p.last_name AS pilot_last_name, c.last_name AS codriver_last_name
              FROM " . TRP_DB::table('results') . " r
              LEFT JOIN " . TRP_DB::table('participants') . " p ON p.id = r.pilot_id
              LEFT JOIN " . TRP_DB::table('participants') . " c ON c.id = r.co_driver_id
+             LEFT JOIN " . TRP_DB::table('points') . " pt ON pt.season_id = r.season_id AND pt.place_number = r.place_number
              WHERE r.season_id = %d AND r.category_id = %d",
             $season_id,
             $category_id
@@ -83,7 +84,7 @@ class TRP_Shortcode
             }
 
             $coef = isset($event_coefficients[$event_id]) ? $event_coefficients[$event_id] : 1.0;
-            $base_points = (int) $res->points;
+            $base_points = (int) $res->base_points_ref;
             $weighted_points = (int) round($base_points * $coef);
 
             $rows[$pilot_id]['results_by_event'][$event_id] = [

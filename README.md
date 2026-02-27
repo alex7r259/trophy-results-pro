@@ -48,5 +48,5 @@ Table is responsive via horizontal scroll on mobile.
 ## Notes
 
 - Unique index `(event_id, pilot_id)` prevents duplicate pilot entries in the same event.
-- Result points are assigned automatically from the season points table.
+- Base points are not persisted in `results`; they are resolved from the season points table by place at read time.
 - Each admin list has a **Delete** action with nonce protection.

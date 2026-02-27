@@ -196,7 +196,7 @@ $delete_url = static function ($entity, $id) {
 
         <h2><?php esc_html_e('Recent results', 'trp'); ?></h2>
         <table class="widefat striped">
-            <thead><tr><th>ID</th><th>Season</th><th>Event</th><th>Category</th><th>Pilot</th><th>Co-driver</th><th>Start #</th><th>Car</th><th>Place</th><th>Points</th><th>Status</th><th><?php esc_html_e('Actions', 'trp'); ?></th></tr></thead>
+            <thead><tr><th>ID</th><th>Season</th><th>Event</th><th>Category</th><th>Pilot</th><th>Co-driver</th><th>Start #</th><th>Car</th><th>Place</th><th>Base points (season table)</th><th>Status</th><th><?php esc_html_e('Actions', 'trp'); ?></th></tr></thead>
             <tbody>
             <?php foreach ($results as $row) : ?>
                 <tr>
@@ -209,7 +209,7 @@ $delete_url = static function ($entity, $id) {
                     <td><?php echo esc_html($row->start_number); ?></td>
                     <td><?php echo esc_html($row->car_name); ?></td>
                     <td><?php echo esc_html($row->place_number); ?></td>
-                    <td><?php echo esc_html($row->points); ?></td>
+                    <td><?php echo esc_html(TRP_Scoring::get_points_for_place((int) $row->season_id, (int) $row->place_number)); ?></td>
                     <td>
                         <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:flex;gap:6px;align-items:center;">
                             <input type="hidden" name="action" value="trp_update_result_status">
