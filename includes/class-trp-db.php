@@ -101,6 +101,8 @@ class TRP_DB
             time_seconds INT UNSIGNED NULL,
             penalty_seconds INT UNSIGNED NOT NULL DEFAULT 0,
             notes TEXT NULL,
+            start_number VARCHAR(50) NULL,
+            car_name VARCHAR(190) NULL,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id),

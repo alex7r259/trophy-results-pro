@@ -127,6 +127,11 @@ class TRP_Admin
 
         if ($season_id && in_array($status, $allowed, true)) {
             global $wpdb;
+
+            if ($status === 'active') {
+                $wpdb->query("UPDATE " . TRP_DB::table('seasons') . " SET status = 'draft' WHERE status = 'active' AND id != " . (int) $season_id);
+            }
+
             $wpdb->update(
                 TRP_DB::table('seasons'),
                 ['status' => $status],
@@ -223,12 +228,18 @@ class TRP_Admin
 
         if ($name && $season_year) {
             global $wpdb;
+            $status = in_array($status, ['draft', 'active', 'completed'], true) ? $status : 'draft';
+
+            if ($status === 'active') {
+                $wpdb->query("UPDATE " . TRP_DB::table('seasons') . " SET status = 'draft' WHERE status = 'active'");
+            }
+
             $wpdb->insert(
                 TRP_DB::table('seasons'),
                 [
                     'name' => $name,
                     'season_year' => $season_year,
-                    'status' => in_array($status, ['draft', 'active', 'completed'], true) ? $status : 'draft',
+                    'status' => $status,
                 ],
                 ['%s', '%d', '%s']
             );
@@ -444,6 +455,8 @@ class TRP_Admin
         $time_seconds = isset($_POST['time_seconds']) ? absint($_POST['time_seconds']) : 0;
         $penalty_seconds = isset($_POST['penalty_seconds']) ? absint($_POST['penalty_seconds']) : 0;
         $notes = isset($_POST['notes']) ? sanitize_textarea_field($_POST['notes']) : '';
+        $start_number = isset($_POST['start_number']) ? sanitize_text_field($_POST['start_number']) : '';
+        $car_name = isset($_POST['car_name']) ? sanitize_text_field($_POST['car_name']) : '';
 
         $allowed_statuses = ['finish', 'dnf', 'dsq', 'dns'];
         if (!in_array($status, $allowed_statuses, true)) {
@@ -467,8 +480,10 @@ class TRP_Admin
                 'time_seconds'    => $time_seconds ?: null,
                 'penalty_seconds' => $penalty_seconds,
                 'notes'           => $notes,
+                'start_number'    => $start_number,
+                'car_name'        => $car_name,
             ],
-            ['%d', '%d', '%d', '%d', '%d', '%d', '%d', '%s', '%d', '%d', '%s']
+            ['%d', '%d', '%d', '%d', '%d', '%d', '%d', '%s', '%d', '%d', '%s', '%s', '%s']
         );
 
         wp_safe_redirect(admin_url('admin.php?page=trp-dashboard&tab=results&saved=1'));

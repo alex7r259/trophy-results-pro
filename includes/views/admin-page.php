@@ -186,6 +186,8 @@ $delete_url = static function ($entity, $id) {
                 <tr><th><label for="status"><?php esc_html_e('Status', 'trp'); ?></label></th><td><select name="status" id="status"><option value="finish">Finish</option><option value="dnf">DNF</option><option value="dsq">DSQ</option><option value="dns">DNS</option></select></td></tr>
                 <tr><th><label for="time_seconds"><?php esc_html_e('Time (sec)', 'trp'); ?></label></th><td><input type="number" min="0" name="time_seconds" id="time_seconds"></td></tr>
                 <tr><th><label for="penalty_seconds"><?php esc_html_e('Penalty (sec)', 'trp'); ?></label></th><td><input type="number" min="0" name="penalty_seconds" id="penalty_seconds" value="0"></td></tr>
+                <tr><th><label for="start_number"><?php esc_html_e('Start number', 'trp'); ?></label></th><td><input type="text" name="start_number" id="start_number"></td></tr>
+                <tr><th><label for="car_name"><?php esc_html_e('Car', 'trp'); ?></label></th><td><input type="text" name="car_name" id="car_name"></td></tr>
                 <tr><th><label for="notes"><?php esc_html_e('Notes', 'trp'); ?></label></th><td><textarea name="notes" id="notes" rows="3" cols="40"></textarea></td></tr>
             </table>
             <p><button class="button button-primary" type="submit"><?php esc_html_e('Save result', 'trp'); ?></button></p>
@@ -193,7 +195,7 @@ $delete_url = static function ($entity, $id) {
 
         <h2><?php esc_html_e('Recent results', 'trp'); ?></h2>
         <table class="widefat striped">
-            <thead><tr><th>ID</th><th>Season</th><th>Event</th><th>Category</th><th>Pilot</th><th>Co-driver</th><th>Place</th><th>Points</th><th>Status</th><th><?php esc_html_e('Actions', 'trp'); ?></th></tr></thead>
+            <thead><tr><th>ID</th><th>Season</th><th>Event</th><th>Category</th><th>Pilot</th><th>Co-driver</th><th>Start #</th><th>Car</th><th>Place</th><th>Points</th><th>Status</th><th><?php esc_html_e('Actions', 'trp'); ?></th></tr></thead>
             <tbody>
             <?php foreach ($results as $row) : ?>
                 <tr>
@@ -203,6 +205,8 @@ $delete_url = static function ($entity, $id) {
                     <td><?php echo esc_html($row->category_id); ?></td>
                     <td><?php echo esc_html($row->pilot_id); ?></td>
                     <td><?php echo esc_html($row->co_driver_id); ?></td>
+                    <td><?php echo esc_html($row->start_number); ?></td>
+                    <td><?php echo esc_html($row->car_name); ?></td>
                     <td><?php echo esc_html($row->place_number); ?></td>
                     <td><?php echo esc_html($row->points); ?></td>
                     <td>

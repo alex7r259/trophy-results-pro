@@ -12,6 +12,7 @@ WordPress plugin for trophy-racing series management with dedicated database tab
 - Admin tabs for managing seasons, events, participants, categories, points, season settings, and results (including delete actions in each table).
 - Judges can edit result status inline in the results table (Finish/DNF/DSQ/DNS) with automatic points recalculation.
 - Judges can also edit season status and event status inline from their list tables.
+- Only one season can be active at a time.
 - Frontend shortcode: `[trophy_standings season="1" category="2"]`.
 
 ## Quick start
@@ -27,11 +28,24 @@ WordPress plugin for trophy-racing series management with dedicated database tab
    - **Categories** tab → add categories for each season.
    - **Points table** tab → define place-to-points mapping (e.g. 1→100, 2→88...).
    - **Season settings** tab → set `all` or `best_n` and `best_events_count`.
-   - **Results** tab → enter event results.
+   - **Results** tab → enter event results (including start number and car).
+
+## Shortcode output
+
+Standings table includes:
+
+- Place
+- Start number
+- Pilot/Co-driver surname
+- Car
+- Every season event column: `Place/Points`
+- Highlighted counted stages for `best_n`
+- Total points
+
+If `season` is omitted, shortcode uses current active season.
 
 ## Notes
 
 - Unique index `(event_id, pilot_id)` prevents duplicate pilot entries in the same event.
 - Result points are assigned automatically from the season points table.
-
 - Each admin list has a **Delete** action with nonce protection.

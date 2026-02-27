@@ -3,3 +3,19 @@
 .trp-admin .form-table textarea {
   min-width: 280px;
 }
+
+.trp-standings-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.trp-standings-table th,
+.trp-standings-table td {
+  border: 1px solid #ddd;
+  padding: 6px;
+}
+
+.trp-counted-stage {
+  background: #e8f5e9;
+  font-weight: 600;
+}
