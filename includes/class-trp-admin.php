@@ -18,6 +18,7 @@ class TRP_Admin
         add_action('admin_post_trp_save_category', [__CLASS__, 'save_category']);
         add_action('admin_post_trp_save_points', [__CLASS__, 'save_points']);
         add_action('admin_post_trp_save_season_settings', [__CLASS__, 'save_season_settings']);
+        add_action('admin_post_trp_delete_row', [__CLASS__, 'delete_row']);
     }
 
     public static function enqueue_assets($hook)
@@ -65,6 +66,47 @@ class TRP_Admin
         $results = $wpdb->get_results('SELECT * FROM ' . TRP_DB::table('results') . ' ORDER BY id DESC LIMIT 100');
 
         include TRP_PLUGIN_PATH . 'includes/views/admin-page.php';
+    }
+
+    private static function delete_map()
+    {
+        return [
+            'seasons' => ['table' => TRP_DB::table('seasons'), 'pk' => 'id', 'tab' => 'seasons'],
+            'events' => ['table' => TRP_DB::table('events'), 'pk' => 'id', 'tab' => 'events'],
+            'participants' => ['table' => TRP_DB::table('participants'), 'pk' => 'id', 'tab' => 'participants'],
+            'categories' => ['table' => TRP_DB::table('categories'), 'pk' => 'id', 'tab' => 'categories'],
+            'points' => ['table' => TRP_DB::table('points'), 'pk' => 'id', 'tab' => 'points'],
+            'settings' => ['table' => TRP_DB::table('season_settings'), 'pk' => 'season_id', 'tab' => 'settings'],
+            'results' => ['table' => TRP_DB::table('results'), 'pk' => 'id', 'tab' => 'results'],
+        ];
+    }
+
+    public static function delete_row()
+    {
+        if (!current_user_can('trp_manage_data')) {
+            wp_die(__('Insufficient permissions', 'trp'));
+        }
+
+        check_admin_referer('trp_delete_row');
+
+        $entity = isset($_GET['entity']) ? sanitize_key($_GET['entity']) : '';
+        $id = isset($_GET['id']) ? absint($_GET['id']) : 0;
+
+        $map = self::delete_map();
+        if (!isset($map[$entity]) || !$id) {
+            wp_safe_redirect(admin_url('admin.php?page=trp-dashboard'));
+            exit;
+        }
+
+        global $wpdb;
+        $wpdb->delete(
+            $map[$entity]['table'],
+            [$map[$entity]['pk'] => $id],
+            ['%d']
+        );
+
+        wp_safe_redirect(admin_url('admin.php?page=trp-dashboard&tab=' . $map[$entity]['tab'] . '&deleted=1'));
+        exit;
     }
 
     public static function save_season()

@@ -9,7 +9,7 @@ WordPress plugin for trophy-racing series management with dedicated database tab
 - Pilot-centered standings with per-category separation.
 - Scoring modes: `all` events or `best_n`.
 - Tie-breakers: wins, second places, last event place.
-- Admin tabs for managing seasons, events, participants, categories, points, season settings, and results.
+- Admin tabs for managing seasons, events, participants, categories, points, season settings, and results (including delete actions in each table).
 - Frontend shortcode: `[trophy_standings season="1" category="2"]`.
 
 ## Quick start
@@ -31,3 +31,5 @@ WordPress plugin for trophy-racing series management with dedicated database tab
 
 - Unique index `(event_id, pilot_id)` prevents duplicate pilot entries in the same event.
 - Result points are assigned automatically from the season points table.
+
+- Each admin list has a **Delete** action with nonce protection.

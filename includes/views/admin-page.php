@@ -12,12 +12,22 @@ $tabs = [
     'points' => __('Points table', 'trp'),
     'settings' => __('Season settings', 'trp'),
 ];
+
+$delete_url = static function ($entity, $id) {
+    return wp_nonce_url(
+        admin_url('admin-post.php?action=trp_delete_row&entity=' . rawurlencode($entity) . '&id=' . absint($id)),
+        'trp_delete_row'
+    );
+};
 ?>
 <div class="wrap trp-admin">
     <h1><?php esc_html_e('Trophy Management', 'trp'); ?></h1>
 
     <?php if (isset($_GET['saved'])) : ?>
         <div class="notice notice-success"><p><?php esc_html_e('Saved successfully.', 'trp'); ?></p></div>
+    <?php endif; ?>
+    <?php if (isset($_GET['deleted'])) : ?>
+        <div class="notice notice-success"><p><?php esc_html_e('Deleted successfully.', 'trp'); ?></p></div>
     <?php endif; ?>
 
     <h2 class="nav-tab-wrapper">
@@ -40,8 +50,8 @@ $tabs = [
         </form>
 
         <h2><?php esc_html_e('Seasons list', 'trp'); ?></h2>
-        <table class="widefat striped"><thead><tr><th>ID</th><th><?php esc_html_e('Name', 'trp'); ?></th><th><?php esc_html_e('Year', 'trp'); ?></th><th><?php esc_html_e('Status', 'trp'); ?></th></tr></thead><tbody>
-        <?php foreach ($seasons as $season) : ?><tr><td><?php echo esc_html($season->id); ?></td><td><?php echo esc_html($season->name); ?></td><td><?php echo esc_html($season->season_year); ?></td><td><?php echo esc_html($season->status); ?></td></tr><?php endforeach; ?>
+        <table class="widefat striped"><thead><tr><th>ID</th><th><?php esc_html_e('Name', 'trp'); ?></th><th><?php esc_html_e('Year', 'trp'); ?></th><th><?php esc_html_e('Status', 'trp'); ?></th><th><?php esc_html_e('Actions', 'trp'); ?></th></tr></thead><tbody>
+        <?php foreach ($seasons as $season) : ?><tr><td><?php echo esc_html($season->id); ?></td><td><?php echo esc_html($season->name); ?></td><td><?php echo esc_html($season->season_year); ?></td><td><?php echo esc_html($season->status); ?></td><td><a class="button button-small button-link-delete" href="<?php echo esc_url($delete_url('seasons', $season->id)); ?>" onclick="return confirm('Delete season?');"><?php esc_html_e('Delete', 'trp'); ?></a></td></tr><?php endforeach; ?>
         </tbody></table>
 
     <?php elseif ($tab === 'events') : ?>
@@ -61,8 +71,8 @@ $tabs = [
         </form>
 
         <h2><?php esc_html_e('Events list', 'trp'); ?></h2>
-        <table class="widefat striped"><thead><tr><th>ID</th><th><?php esc_html_e('Season ID', 'trp'); ?></th><th><?php esc_html_e('Name', 'trp'); ?></th><th><?php esc_html_e('Stage', 'trp'); ?></th><th><?php esc_html_e('Status', 'trp'); ?></th></tr></thead><tbody>
-        <?php foreach ($events as $event) : ?><tr><td><?php echo esc_html($event->id); ?></td><td><?php echo esc_html($event->season_id); ?></td><td><?php echo esc_html($event->name); ?></td><td><?php echo esc_html($event->stage_number); ?></td><td><?php echo esc_html($event->status); ?></td></tr><?php endforeach; ?>
+        <table class="widefat striped"><thead><tr><th>ID</th><th><?php esc_html_e('Season ID', 'trp'); ?></th><th><?php esc_html_e('Name', 'trp'); ?></th><th><?php esc_html_e('Stage', 'trp'); ?></th><th><?php esc_html_e('Status', 'trp'); ?></th><th><?php esc_html_e('Actions', 'trp'); ?></th></tr></thead><tbody>
+        <?php foreach ($events as $event) : ?><tr><td><?php echo esc_html($event->id); ?></td><td><?php echo esc_html($event->season_id); ?></td><td><?php echo esc_html($event->name); ?></td><td><?php echo esc_html($event->stage_number); ?></td><td><?php echo esc_html($event->status); ?></td><td><a class="button button-small button-link-delete" href="<?php echo esc_url($delete_url('events', $event->id)); ?>" onclick="return confirm('Delete event?');"><?php esc_html_e('Delete', 'trp'); ?></a></td></tr><?php endforeach; ?>
         </tbody></table>
 
     <?php elseif ($tab === 'participants') : ?>
@@ -80,8 +90,8 @@ $tabs = [
         </form>
 
         <h2><?php esc_html_e('Participants list', 'trp'); ?></h2>
-        <table class="widefat striped"><thead><tr><th>ID</th><th><?php esc_html_e('Last name', 'trp'); ?></th><th><?php esc_html_e('First name', 'trp'); ?></th><th><?php esc_html_e('City', 'trp'); ?></th><th><?php esc_html_e('License', 'trp'); ?></th></tr></thead><tbody>
-        <?php foreach ($participants as $participant) : ?><tr><td><?php echo esc_html($participant->id); ?></td><td><?php echo esc_html($participant->last_name); ?></td><td><?php echo esc_html($participant->first_name); ?></td><td><?php echo esc_html($participant->city); ?></td><td><?php echo esc_html($participant->license_number); ?></td></tr><?php endforeach; ?>
+        <table class="widefat striped"><thead><tr><th>ID</th><th><?php esc_html_e('Last name', 'trp'); ?></th><th><?php esc_html_e('First name', 'trp'); ?></th><th><?php esc_html_e('City', 'trp'); ?></th><th><?php esc_html_e('License', 'trp'); ?></th><th><?php esc_html_e('Actions', 'trp'); ?></th></tr></thead><tbody>
+        <?php foreach ($participants as $participant) : ?><tr><td><?php echo esc_html($participant->id); ?></td><td><?php echo esc_html($participant->last_name); ?></td><td><?php echo esc_html($participant->first_name); ?></td><td><?php echo esc_html($participant->city); ?></td><td><?php echo esc_html($participant->license_number); ?></td><td><a class="button button-small button-link-delete" href="<?php echo esc_url($delete_url('participants', $participant->id)); ?>" onclick="return confirm('Delete participant?');"><?php esc_html_e('Delete', 'trp'); ?></a></td></tr><?php endforeach; ?>
         </tbody></table>
 
     <?php elseif ($tab === 'categories') : ?>
@@ -97,8 +107,8 @@ $tabs = [
         </form>
 
         <h2><?php esc_html_e('Categories list', 'trp'); ?></h2>
-        <table class="widefat striped"><thead><tr><th>ID</th><th><?php esc_html_e('Season ID', 'trp'); ?></th><th><?php esc_html_e('Name', 'trp'); ?></th><th><?php esc_html_e('Slug', 'trp'); ?></th></tr></thead><tbody>
-        <?php foreach ($categories as $category) : ?><tr><td><?php echo esc_html($category->id); ?></td><td><?php echo esc_html($category->season_id); ?></td><td><?php echo esc_html($category->name); ?></td><td><?php echo esc_html($category->slug); ?></td></tr><?php endforeach; ?>
+        <table class="widefat striped"><thead><tr><th>ID</th><th><?php esc_html_e('Season ID', 'trp'); ?></th><th><?php esc_html_e('Name', 'trp'); ?></th><th><?php esc_html_e('Slug', 'trp'); ?></th><th><?php esc_html_e('Actions', 'trp'); ?></th></tr></thead><tbody>
+        <?php foreach ($categories as $category) : ?><tr><td><?php echo esc_html($category->id); ?></td><td><?php echo esc_html($category->season_id); ?></td><td><?php echo esc_html($category->name); ?></td><td><?php echo esc_html($category->slug); ?></td><td><a class="button button-small button-link-delete" href="<?php echo esc_url($delete_url('categories', $category->id)); ?>" onclick="return confirm('Delete category?');"><?php esc_html_e('Delete', 'trp'); ?></a></td></tr><?php endforeach; ?>
         </tbody></table>
 
     <?php elseif ($tab === 'points') : ?>
@@ -115,8 +125,8 @@ $tabs = [
         </form>
 
         <h2><?php esc_html_e('Points table', 'trp'); ?></h2>
-        <table class="widefat striped"><thead><tr><th>ID</th><th><?php esc_html_e('Season ID', 'trp'); ?></th><th><?php esc_html_e('Place', 'trp'); ?></th><th><?php esc_html_e('Points', 'trp'); ?></th></tr></thead><tbody>
-        <?php foreach ($points_rows as $point) : ?><tr><td><?php echo esc_html($point->id); ?></td><td><?php echo esc_html($point->season_id); ?></td><td><?php echo esc_html($point->place_number); ?></td><td><?php echo esc_html($point->points); ?></td></tr><?php endforeach; ?>
+        <table class="widefat striped"><thead><tr><th>ID</th><th><?php esc_html_e('Season ID', 'trp'); ?></th><th><?php esc_html_e('Place', 'trp'); ?></th><th><?php esc_html_e('Points', 'trp'); ?></th><th><?php esc_html_e('Actions', 'trp'); ?></th></tr></thead><tbody>
+        <?php foreach ($points_rows as $point) : ?><tr><td><?php echo esc_html($point->id); ?></td><td><?php echo esc_html($point->season_id); ?></td><td><?php echo esc_html($point->place_number); ?></td><td><?php echo esc_html($point->points); ?></td><td><a class="button button-small button-link-delete" href="<?php echo esc_url($delete_url('points', $point->id)); ?>" onclick="return confirm('Delete points row?');"><?php esc_html_e('Delete', 'trp'); ?></a></td></tr><?php endforeach; ?>
         </tbody></table>
 
     <?php elseif ($tab === 'settings') : ?>
@@ -133,8 +143,8 @@ $tabs = [
         </form>
 
         <h2><?php esc_html_e('Current season settings', 'trp'); ?></h2>
-        <table class="widefat striped"><thead><tr><th><?php esc_html_e('Season ID', 'trp'); ?></th><th><?php esc_html_e('Scoring type', 'trp'); ?></th><th><?php esc_html_e('Best events count', 'trp'); ?></th></tr></thead><tbody>
-        <?php foreach ($season_settings as $setting) : ?><tr><td><?php echo esc_html($setting->season_id); ?></td><td><?php echo esc_html($setting->scoring_type); ?></td><td><?php echo esc_html($setting->best_events_count); ?></td></tr><?php endforeach; ?>
+        <table class="widefat striped"><thead><tr><th><?php esc_html_e('Season ID', 'trp'); ?></th><th><?php esc_html_e('Scoring type', 'trp'); ?></th><th><?php esc_html_e('Best events count', 'trp'); ?></th><th><?php esc_html_e('Actions', 'trp'); ?></th></tr></thead><tbody>
+        <?php foreach ($season_settings as $setting) : ?><tr><td><?php echo esc_html($setting->season_id); ?></td><td><?php echo esc_html($setting->scoring_type); ?></td><td><?php echo esc_html($setting->best_events_count); ?></td><td><a class="button button-small button-link-delete" href="<?php echo esc_url($delete_url('settings', $setting->season_id)); ?>" onclick="return confirm('Delete settings row?');"><?php esc_html_e('Delete', 'trp'); ?></a></td></tr><?php endforeach; ?>
         </tbody></table>
 
     <?php else : ?>
@@ -159,7 +169,7 @@ $tabs = [
 
         <h2><?php esc_html_e('Recent results', 'trp'); ?></h2>
         <table class="widefat striped">
-            <thead><tr><th>ID</th><th>Season</th><th>Event</th><th>Category</th><th>Pilot</th><th>Co-driver</th><th>Place</th><th>Points</th><th>Status</th></tr></thead>
+            <thead><tr><th>ID</th><th>Season</th><th>Event</th><th>Category</th><th>Pilot</th><th>Co-driver</th><th>Place</th><th>Points</th><th>Status</th><th><?php esc_html_e('Actions', 'trp'); ?></th></tr></thead>
             <tbody>
             <?php foreach ($results as $row) : ?>
                 <tr>
@@ -172,6 +182,7 @@ $tabs = [
                     <td><?php echo esc_html($row->place_number); ?></td>
                     <td><?php echo esc_html($row->points); ?></td>
                     <td><?php echo esc_html($row->status); ?></td>
+                    <td><a class="button button-small button-link-delete" href="<?php echo esc_url($delete_url('results', $row->id)); ?>" onclick="return confirm('Delete result row?');"><?php esc_html_e('Delete', 'trp'); ?></a></td>
                 </tr>
             <?php endforeach; ?>
             </tbody>
