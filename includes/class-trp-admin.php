@@ -19,6 +19,7 @@ class TRP_Admin
         add_action('admin_post_trp_save_points', [__CLASS__, 'save_points']);
         add_action('admin_post_trp_save_season_settings', [__CLASS__, 'save_season_settings']);
         add_action('admin_post_trp_delete_row', [__CLASS__, 'delete_row']);
+        add_action('admin_post_trp_update_result_status', [__CLASS__, 'update_result_status']);
     }
 
     public static function enqueue_assets($hook)
@@ -106,6 +107,49 @@ class TRP_Admin
         );
 
         wp_safe_redirect(admin_url('admin.php?page=trp-dashboard&tab=' . $map[$entity]['tab'] . '&deleted=1'));
+        exit;
+    }
+
+
+    public static function update_result_status()
+    {
+        if (!current_user_can('trp_manage_data')) {
+            wp_die(__('Insufficient permissions', 'trp'));
+        }
+
+        check_admin_referer('trp_update_result_status');
+
+        $result_id = isset($_POST['result_id']) ? absint($_POST['result_id']) : 0;
+        $status = isset($_POST['status']) ? sanitize_key($_POST['status']) : 'finish';
+        $allowed_statuses = ['finish', 'dnf', 'dsq', 'dns'];
+
+        if ($result_id && in_array($status, $allowed_statuses, true)) {
+            global $wpdb;
+            $results_table = TRP_DB::table('results');
+            $result = $wpdb->get_row($wpdb->prepare(
+                "SELECT id, season_id, place_number FROM {$results_table} WHERE id = %d",
+                $result_id
+            ));
+
+            if ($result) {
+                $points = ($status === 'finish')
+                    ? TRP_Scoring::get_points_for_place((int) $result->season_id, (int) $result->place_number)
+                    : 0;
+
+                $wpdb->update(
+                    $results_table,
+                    [
+                        'status' => $status,
+                        'points' => $points,
+                    ],
+                    ['id' => $result_id],
+                    ['%s', '%d'],
+                    ['%d']
+                );
+            }
+        }
+
+        wp_safe_redirect(admin_url('admin.php?page=trp-dashboard&tab=results&saved=1'));
         exit;
     }
 

@@ -181,7 +181,20 @@ $delete_url = static function ($entity, $id) {
                     <td><?php echo esc_html($row->co_driver_id); ?></td>
                     <td><?php echo esc_html($row->place_number); ?></td>
                     <td><?php echo esc_html($row->points); ?></td>
-                    <td><?php echo esc_html($row->status); ?></td>
+                    <td>
+                        <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:flex;gap:6px;align-items:center;">
+                            <input type="hidden" name="action" value="trp_update_result_status">
+                            <input type="hidden" name="result_id" value="<?php echo esc_attr($row->id); ?>">
+                            <?php wp_nonce_field('trp_update_result_status'); ?>
+                            <select name="status">
+                                <option value="finish" <?php selected($row->status, 'finish'); ?>>Finish</option>
+                                <option value="dnf" <?php selected($row->status, 'dnf'); ?>>DNF</option>
+                                <option value="dsq" <?php selected($row->status, 'dsq'); ?>>DSQ</option>
+                                <option value="dns" <?php selected($row->status, 'dns'); ?>>DNS</option>
+                            </select>
+                            <button class="button button-small" type="submit"><?php esc_html_e('Update', 'trp'); ?></button>
+                        </form>
+                    </td>
                     <td><a class="button button-small button-link-delete" href="<?php echo esc_url($delete_url('results', $row->id)); ?>" onclick="return confirm('Delete result row?');"><?php esc_html_e('Delete', 'trp'); ?></a></td>
                 </tr>
             <?php endforeach; ?>

@@ -10,6 +10,7 @@ WordPress plugin for trophy-racing series management with dedicated database tab
 - Scoring modes: `all` events or `best_n`.
 - Tie-breakers: wins, second places, last event place.
 - Admin tabs for managing seasons, events, participants, categories, points, season settings, and results (including delete actions in each table).
+- Judges can edit result status inline in the results table (Finish/DNF/DSQ/DNS) with automatic points recalculation.
 - Frontend shortcode: `[trophy_standings season="1" category="2"]`.
 
 ## Quick start
