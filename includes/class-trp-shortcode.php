@@ -138,65 +138,63 @@ class TRP_Shortcode
         ob_start();
         ?>
         <style>
-            .trp-table-responsive{overflow-x:auto;-webkit-overflow-scrolling:touch}
-            .trp-standings-table{width:100%;min-width:980px;border-collapse:collapse}
-            .trp-standings-table th,.trp-standings-table td{border:1px solid #ddd;padding:6px;text-align:center;white-space:nowrap}
-            .trp-counted-stage{background:#e8f5e9;font-weight:600}
-            .trp-fio{text-align:left;white-space:normal}
-            @media (max-width: 768px){
-                .trp-standings-table{font-size:12px}
-            }
+            .table-responsive{overflow-x:auto;-webkit-overflow-scrolling:touch}
+            .results-table{width:100%;min-width:1080px;border-collapse:collapse;background:#fff}
+            .results-table th,.results-table td{border:1px solid #d7d7d7;padding:8px 6px}
+            .results-table thead th{background:#f2f4f7;font-weight:700}
+            .results_place{font-weight:700}
+            .scores-border{border-right:2px solid #b5b5b5}
+            .results_scores_all{font-weight:700;background:#f9fbfd}
+            .trp-counted-stage{background:PaleGreen}
+            @media (max-width:768px){.results-table{font-size:12px}.results-table th,.results-table td{padding:6px 4px}}
         </style>
-        <div class="trp-table-responsive">
-            <table class="trp-standings-table">
-                <thead>
-                    <tr>
-                        <th rowspan="2"><?php esc_html_e('Место', 'trp'); ?></th>
-                        <th rowspan="2"><?php esc_html_e('Стартовый номер', 'trp'); ?></th>
-                        <th rowspan="2"><?php esc_html_e('Фамилия Пилот/Штурман', 'trp'); ?></th>
-                        <th rowspan="2"><?php esc_html_e('Автомобиль', 'trp'); ?></th>
-                        <?php foreach ($events as $event) :
-                            $coef = rtrim(rtrim((string) ((float) $event->coefficient), '0'), '.'); ?>
-                            <th colspan="2"><?php echo esc_html($event->stage_number . ' этап'); ?><br><?php echo esc_html('x' . $coef); ?></th>
-                        <?php endforeach; ?>
-                        <th rowspan="2"><?php esc_html_e('Итог', 'trp'); ?></th>
-                    </tr>
-                    <tr>
-                        <?php foreach ($events as $event) : ?>
-                            <th><?php esc_html_e('Место', 'trp'); ?></th>
-                            <th><?php esc_html_e('Баллы', 'trp'); ?></th>
-                        <?php endforeach; ?>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($rows as $rank => $row) : ?>
+        <div class="table-responsive">
+            <figure class="wp-block-table is-style-stripes">
+                <table class="delivery results-table responsive-mode">
+                    <thead>
                         <tr>
-                            <td><?php echo esc_html($rank + 1); ?></td>
-                            <td><?php echo esc_html($row['start_number']); ?></td>
-                            <td class="trp-fio"><?php echo esc_html($row['pilot_last_name'] . ' / ' . $row['codriver_last_name']); ?></td>
-                            <td><?php echo esc_html($row['car_name']); ?></td>
-                            <?php foreach ($events as $event) :
-                                $event_id = (int) $event->id;
-                                $result = isset($row['results_by_event'][$event_id]) ? $row['results_by_event'][$event_id] : null;
-                                $is_counted = in_array($event_id, $row['counted_event_ids'], true);
-                                $cell_class = $is_counted ? 'trp-counted-stage' : '';
-                                ?>
-                                <td class="<?php echo esc_attr($cell_class); ?>">
-                                    <?php echo $result ? esc_html($result['place']) : '—'; ?>
-                                </td>
-                                <td class="<?php echo esc_attr($cell_class); ?>">
-                                    <?php if ($result) : ?>
-                                        <?php echo esc_html($result['base_points'] . ' (' . $result['weighted_points'] . ')'); ?>
-                                    <?php else : ?>
-                                        —
-                                    <?php endif; ?>
-                                </td>
+                            <th rowspan="2" class="has-text-align-center" data-align="center"><?php esc_html_e('Место', 'trp'); ?></th>
+                            <th rowspan="2" class="has-text-align-center" data-align="center"><?php esc_html_e('Стартовый<br>номер', 'trp'); ?></th>
+                            <th rowspan="2" class="has-text-align-center" data-align="center"><?php esc_html_e('Фамилия Имя Пилот/Штурман', 'trp'); ?></th>
+                            <th rowspan="2" class="has-text-align-center" data-align="center"><?php esc_html_e('Автомобиль', 'trp'); ?></th>
+                            <?php foreach ($events as $event) : ?>
+                                <th colspan="2" class="has-text-align-center" data-align="center"><?php echo esc_html($event->stage_number . ' этап'); ?></th>
                             <?php endforeach; ?>
-                            <td><strong><?php echo esc_html($row['total']); ?></strong></td>
+                            <th rowspan="2" class="has-text-align-center" data-align="center"><?php esc_html_e('Баллы<br>Итог', 'trp'); ?></th>
                         </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+                        <tr>
+                            <?php foreach ($events as $event) :
+                                $coef = rtrim(rtrim((string) ((float) $event->coefficient), '0'), '.'); ?>
+                                <th class="has-text-align-center" data-align="center"><?php esc_html_e('Место', 'trp'); ?></th>
+                                <th class="has-text-align-center" data-align="center"><?php echo esc_html('Баллы (x' . $coef . ')'); ?></th>
+                            <?php endforeach; ?>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($rows as $rank => $row) :
+                            $place_label = ($row['total'] > 0) ? (string) ($rank + 1) : '-'; ?>
+                            <tr>
+                                <td aria-label="Место" class="has-text-align-center results_place" data-align="center"><?php echo esc_html($place_label); ?></td>
+                                <td aria-label="Стартовый номер" class="has-text-align-center" data-align="center"><?php echo esc_html($row['start_number']); ?></td>
+                                <td aria-label="ФИО Пилот/Штурман" class="has-text-align-center" data-align="center"><?php echo esc_html($row['pilot_last_name'] . ', ' . $row['codriver_last_name']); ?></td>
+                                <td aria-label="Автомобиль" class="has-text-align-center scores-border" data-align="center"><?php echo esc_html($row['car_name']); ?></td>
+                                <?php foreach ($events as $event) :
+                                    $event_id = (int) $event->id;
+                                    $result = isset($row['results_by_event'][$event_id]) ? $row['results_by_event'][$event_id] : null;
+                                    $is_counted = in_array($event_id, $row['counted_event_ids'], true);
+                                    $cell_class = $is_counted ? 'trp-counted-stage' : '';
+                                    $place = $result ? (string) $result['place'] : '-';
+                                    $points_text = $result ? ($result['base_points'] . ' (' . $result['weighted_points'] . ')') : '0 (0)';
+                                    ?>
+                                    <td aria-label="Место <?php echo esc_attr($event->stage_number); ?> этап" class="has-text-align-center results_scores <?php echo esc_attr($cell_class); ?>" data-align="center"><?php echo esc_html($place); ?></td>
+                                    <td aria-label="Баллы <?php echo esc_attr($event->stage_number); ?> этап" class="has-text-align-center results_scores scores-border <?php echo esc_attr($cell_class); ?>" data-align="center"><?php echo esc_html($points_text); ?></td>
+                                <?php endforeach; ?>
+                                <td aria-label="Баллы" class="has-text-align-center results_scores_all" data-align="center"><?php echo esc_html($row['total']); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </figure>
         </div>
         <?php
 
