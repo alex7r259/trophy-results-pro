@@ -24,7 +24,7 @@ WordPress plugin for trophy-racing series management with dedicated database tab
 5. Add data in this order:
    - **Seasons** tab → create season.
    - **Participants** tab → add pilots and co-drivers.
-   - **Events** tab → add season events.
+   - **Events** tab → add season events and set stage coefficient (e.g. 1.0 / 1.5).
    - **Categories** tab → add categories for each season.
    - **Points table** tab → define place-to-points mapping (e.g. 1→100, 2→88...).
    - **Season settings** tab → set `all` or `best_n` and `best_events_count`.
@@ -38,9 +38,9 @@ Standings table includes:
 - Start number
 - Pilot/Co-driver surname
 - Car
-- Every season event column: `Place/Points`
+- Every season event column: `Place/Weighted points` (points × stage coefficient)
 - Highlighted counted stages for `best_n`
-- Total points
+- Total weighted points
 
 If `season` is omitted, shortcode uses current active season.
 

@@ -261,6 +261,7 @@ class TRP_Admin
         $stage_number = isset($_POST['stage_number']) ? absint($_POST['stage_number']) : 0;
         $date_start = isset($_POST['date_start']) ? sanitize_text_field($_POST['date_start']) : '';
         $date_end = isset($_POST['date_end']) ? sanitize_text_field($_POST['date_end']) : '';
+        $coefficient = isset($_POST['coefficient']) ? (float) $_POST['coefficient'] : 1.0;
         $status = isset($_POST['status']) ? sanitize_key($_POST['status']) : 'draft';
 
         if ($season_id && $name && $stage_number) {
@@ -273,9 +274,10 @@ class TRP_Admin
                     'stage_number' => $stage_number,
                     'date_start' => $date_start ?: null,
                     'date_end' => $date_end ?: null,
+                    'coefficient' => max(0.1, $coefficient),
                     'status' => in_array($status, ['draft', 'published', 'closed'], true) ? $status : 'draft',
                 ],
-                ['%d', '%s', '%d', '%s', '%s', '%s']
+                ['%d', '%s', '%d', '%s', '%s', '%f', '%s']
             );
         }
 

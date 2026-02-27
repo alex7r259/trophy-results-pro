@@ -39,6 +39,7 @@ class TRP_DB
             stage_number TINYINT UNSIGNED NOT NULL,
             date_start DATE NULL,
             date_end DATE NULL,
+            coefficient DECIMAL(5,2) NOT NULL DEFAULT 1.00,
             status VARCHAR(20) NOT NULL DEFAULT 'draft',
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

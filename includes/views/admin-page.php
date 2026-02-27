@@ -77,14 +77,15 @@ $delete_url = static function ($entity, $id) {
                 <tr><th><label for="event_stage"><?php esc_html_e('Stage number', 'trp'); ?></label></th><td><input type="number" min="1" id="event_stage" name="stage_number" required></td></tr>
                 <tr><th><label for="event_start"><?php esc_html_e('Start date', 'trp'); ?></label></th><td><input type="date" id="event_start" name="date_start"></td></tr>
                 <tr><th><label for="event_end"><?php esc_html_e('End date', 'trp'); ?></label></th><td><input type="date" id="event_end" name="date_end"></td></tr>
+                <tr><th><label for="event_coefficient"><?php esc_html_e('Coefficient', 'trp'); ?></label></th><td><input type="number" step="0.01" min="0.1" id="event_coefficient" name="coefficient" value="1"></td></tr>
                 <tr><th><label for="event_status"><?php esc_html_e('Status', 'trp'); ?></label></th><td><select id="event_status" name="status"><option value="draft">Draft</option><option value="published">Published</option><option value="closed">Closed</option></select></td></tr>
             </table>
             <p><button class="button button-primary" type="submit"><?php esc_html_e('Save event', 'trp'); ?></button></p>
         </form>
 
         <h2><?php esc_html_e('Events list', 'trp'); ?></h2>
-        <table class="widefat striped"><thead><tr><th>ID</th><th><?php esc_html_e('Season ID', 'trp'); ?></th><th><?php esc_html_e('Name', 'trp'); ?></th><th><?php esc_html_e('Stage', 'trp'); ?></th><th><?php esc_html_e('Status', 'trp'); ?></th><th><?php esc_html_e('Actions', 'trp'); ?></th></tr></thead><tbody>
-        <?php foreach ($events as $event) : ?><tr><td><?php echo esc_html($event->id); ?></td><td><?php echo esc_html($event->season_id); ?></td><td><?php echo esc_html($event->name); ?></td><td><?php echo esc_html($event->stage_number); ?></td><td>
+        <table class="widefat striped"><thead><tr><th>ID</th><th><?php esc_html_e('Season ID', 'trp'); ?></th><th><?php esc_html_e('Name', 'trp'); ?></th><th><?php esc_html_e('Stage', 'trp'); ?></th><th><?php esc_html_e('Coeff', 'trp'); ?></th><th><?php esc_html_e('Status', 'trp'); ?></th><th><?php esc_html_e('Actions', 'trp'); ?></th></tr></thead><tbody>
+        <?php foreach ($events as $event) : ?><tr><td><?php echo esc_html($event->id); ?></td><td><?php echo esc_html($event->season_id); ?></td><td><?php echo esc_html($event->name); ?></td><td><?php echo esc_html($event->stage_number); ?></td><td><?php echo esc_html($event->coefficient); ?></td><td>
             <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:flex;gap:6px;align-items:center;">
                 <input type="hidden" name="action" value="trp_update_event_status">
                 <input type="hidden" name="event_id" value="<?php echo esc_attr($event->id); ?>">

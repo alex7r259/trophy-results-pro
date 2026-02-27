@@ -32,7 +32,7 @@ class TRP_Shortcode
         }
 
         $events = $wpdb->get_results($wpdb->prepare(
-            "SELECT id, name, stage_number FROM " . TRP_DB::table('events') . " WHERE season_id = %d ORDER BY stage_number ASC",
+            "SELECT id, name, stage_number, coefficient FROM " . TRP_DB::table('events') . " WHERE season_id = %d ORDER BY stage_number ASC",
             $season_id
         ));
 
@@ -40,9 +40,10 @@ class TRP_Shortcode
             return '<p>' . esc_html__('No events found for this season.', 'trp') . '</p>';
         }
 
-        $event_ids = array_map(static function ($e) {
-            return (int) $e->id;
-        }, $events);
+        $event_coefficients = [];
+        foreach ($events as $event) {
+            $event_coefficients[(int) $event->id] = isset($event->coefficient) ? (float) $event->coefficient : 1.0;
+        }
 
         $results = $wpdb->get_results($wpdb->prepare(
             "SELECT r.*, p.last_name AS pilot_last_name, c.last_name AS codriver_last_name
@@ -81,9 +82,15 @@ class TRP_Shortcode
                 ];
             }
 
-            $rows[$pilot_id]['results_by_event'][(int) $res->event_id] = [
+            $event_id = (int) $res->event_id;
+            $coefficient = isset($event_coefficients[$event_id]) ? $event_coefficients[$event_id] : 1.0;
+            $weighted_points = (int) round(((int) $res->points) * $coefficient);
+
+            $rows[$pilot_id]['results_by_event'][$event_id] = [
                 'place' => (int) $res->place_number,
-                'points' => (int) $res->points,
+                'points' => $weighted_points,
+                'weighted_points' => $weighted_points,
+                'coefficient' => $coefficient,
                 'status' => $res->status,
             ];
 
@@ -100,7 +107,7 @@ class TRP_Shortcode
             if ($res->status === 'finish') {
                 $rows[$pilot_id]['finish_results'][] = [
                     'event_id' => (int) $res->event_id,
-                    'points' => (int) $res->points,
+                    'points' => $weighted_points,
                 ];
             }
         }
@@ -143,7 +150,7 @@ class TRP_Shortcode
                     <th><?php esc_html_e('Фамилия Пилот/Штурман', 'trp'); ?></th>
                     <th><?php esc_html_e('Автомобиль', 'trp'); ?></th>
                     <?php foreach ($events as $event) : ?>
-                        <th><?php echo esc_html($event->stage_number . ' этап'); ?></th>
+                        <th><?php echo esc_html($event->stage_number . ' этап x' . (isset($event->coefficient) ? (float) $event->coefficient : 1)); ?></th>
                     <?php endforeach; ?>
                     <th><?php esc_html_e('Итог', 'trp'); ?></th>
                 </tr>
@@ -162,7 +169,7 @@ class TRP_Shortcode
                             ?>
                             <td class="<?php echo $is_counted ? 'trp-counted-stage' : ''; ?>">
                                 <?php if ($event_result) : ?>
-                                    <?php echo esc_html($event_result['place'] . ' / ' . $event_result['points']); ?>
+                                    <?php echo esc_html($event_result['place'] . ' / ' . $event_result['weighted_points']); ?>
                                 <?php else : ?>
                                     —
                                 <?php endif; ?>

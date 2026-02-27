@@ -32,12 +32,14 @@ class TRP_Scoring
             $season_id
         ));
 
+        $events_table = TRP_DB::table('events');
         $rows = $wpdb->get_results($wpdb->prepare(
-            "SELECT pilot_id, place_number, points, event_id
-             FROM {$results_table}
-             WHERE season_id = %d
-               AND category_id = %d
-               AND status = 'finish'",
+            "SELECT r.pilot_id, r.place_number, r.points, r.event_id, e.coefficient
+             FROM {$results_table} r
+             LEFT JOIN {$events_table} e ON e.id = r.event_id
+             WHERE r.season_id = %d
+               AND r.category_id = %d
+               AND r.status = 'finish'",
             $season_id,
             $category_id
         ));
@@ -50,7 +52,7 @@ class TRP_Scoring
             }
 
             $by_pilot[$pilot_id][] = [
-                'points' => (int) $row->points,
+                'points' => (int) round(((int) $row->points) * (float) ($row->coefficient ?: 1)),
                 'place'  => (int) $row->place_number,
                 'event'  => (int) $row->event_id,
             ];
