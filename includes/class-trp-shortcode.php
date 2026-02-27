@@ -31,6 +31,8 @@ class TRP_Shortcode
             return '<p>' . esc_html__('Season (or active season) and category are required.', 'trp') . '</p>';
         }
 
+        wp_enqueue_style('trp-results-style', TRP_PLUGIN_URL . 'assets/results_style.css', [], TRP_PLUGIN_VERSION);
+
         $events = $wpdb->get_results($wpdb->prepare(
             "SELECT id, stage_number, coefficient FROM " . TRP_DB::table('events') . " WHERE season_id = %d ORDER BY stage_number ASC",
             $season_id
@@ -137,17 +139,6 @@ class TRP_Shortcode
 
         ob_start();
         ?>
-        <style>
-            .table-responsive{overflow-x:auto;-webkit-overflow-scrolling:touch}
-            .results-table{width:100%;min-width:1080px;border-collapse:collapse;background:#fff}
-            .results-table th,.results-table td{border:1px solid #d7d7d7;padding:8px 6px}
-            .results-table thead th{background:#f2f4f7;font-weight:700}
-            .results_place{font-weight:700}
-            .scores-border{border-right:2px solid #b5b5b5}
-            .results_scores_all{font-weight:700;background:#f9fbfd}
-            .trp-counted-stage{background:PaleGreen}
-            @media (max-width:768px){.results-table{font-size:12px}.results-table th,.results-table td{padding:6px 4px}}
-        </style>
         <div class="table-responsive">
             <figure class="wp-block-table is-style-stripes">
                 <table class="delivery results-table responsive-mode">
