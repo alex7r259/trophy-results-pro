@@ -51,10 +51,11 @@ class TRP_Shortcode
 
         $nonce = wp_create_nonce('trp_results_ajax_nonce');
         $ajax_url = admin_url('admin-ajax.php');
+        $container_id = 'trp-results-' . wp_generate_uuid4();
 
         ob_start();
         ?>
-        <div class="results-container" data-season-id="<?php echo esc_attr($season_id); ?>" data-category-id="<?php echo esc_attr($category_id); ?>" data-nonce="<?php echo esc_attr($nonce); ?>">
+        <div id="<?php echo esc_attr($container_id); ?>" class="results-container" data-season-id="<?php echo esc_attr($season_id); ?>" data-category-id="<?php echo esc_attr($category_id); ?>" data-nonce="<?php echo esc_attr($nonce); ?>">
             <div class="results-header">
                 <div class="season-filters">
                     <?php foreach ($seasons as $season) :
@@ -79,10 +80,10 @@ class TRP_Shortcode
         </div>
         <script>
         (function(){
-            const root = document.currentScript.previousElementSibling;
-            if (!root || !root.classList.contains('results-container')) { return; }
+            const root = document.getElementById(<?php echo wp_json_encode($container_id); ?>);
+            if (!root) { return; }
             const ajaxUrl = <?php echo wp_json_encode($ajax_url); ?>;
-            const nonce = root.dataset.nonce;
+            const nonce = <?php echo wp_json_encode($nonce); ?>;
             const tableContent = root.querySelector('#results-table-content');
 
             function bindHandlers(){
