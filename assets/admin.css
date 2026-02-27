@@ -1,0 +1,5 @@
+.trp-admin .form-table select,
+.trp-admin .form-table input,
+.trp-admin .form-table textarea {
+  min-width: 280px;
+}
