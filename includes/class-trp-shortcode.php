@@ -145,7 +145,12 @@ class TRP_Shortcode
 
     public static function ajax_get_class_results()
     {
-        if (!isset($_POST['security']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['security'])), 'trp_results_ajax_nonce')) {
+        $nonce_value = isset($_POST['security']) ? sanitize_text_field(wp_unslash($_POST['security'])) : '';
+        $nonce_valid = $nonce_value && wp_verify_nonce($nonce_value, 'trp_results_ajax_nonce');
+
+        // Endpoint is read-only. Keep strict nonce check for logged-in users,
+        // but allow public (nopriv) requests to avoid page-cache nonce mismatch.
+        if (is_user_logged_in() && !$nonce_valid) {
             wp_die('Security check failed');
         }
 
