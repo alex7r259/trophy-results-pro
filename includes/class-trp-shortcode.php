@@ -11,6 +11,8 @@ class TRP_Shortcode
         add_shortcode('trophy_standings', [__CLASS__, 'render_standings']);
         add_action('wp_ajax_get_class_results', [__CLASS__, 'ajax_get_class_results']);
         add_action('wp_ajax_nopriv_get_class_results', [__CLASS__, 'ajax_get_class_results']);
+        add_action('wp_ajax_trp_get_results_nonce', [__CLASS__, 'ajax_get_results_nonce']);
+        add_action('wp_ajax_nopriv_trp_get_results_nonce', [__CLASS__, 'ajax_get_results_nonce']);
     }
 
     public static function render_standings($atts)
@@ -49,13 +51,12 @@ class TRP_Shortcode
 
         wp_enqueue_style('trp-results-style', TRP_PLUGIN_URL . 'assets/results_style.css', [], TRP_PLUGIN_VERSION);
 
-        $nonce = wp_create_nonce('trp_results_ajax_nonce');
         $ajax_url = admin_url('admin-ajax.php');
         $container_id = 'trp-results-' . wp_generate_uuid4();
 
         ob_start();
         ?>
-        <div id="<?php echo esc_attr($container_id); ?>" class="results-container" data-season-id="<?php echo esc_attr($season_id); ?>" data-category-id="<?php echo esc_attr($category_id); ?>" data-nonce="<?php echo esc_attr($nonce); ?>">
+        <div id="<?php echo esc_attr($container_id); ?>" class="results-container" data-season-id="<?php echo esc_attr($season_id); ?>" data-category-id="<?php echo esc_attr($category_id); ?>">
             <div class="results-header">
                 <div class="season-filters">
                     <?php foreach ($seasons as $season) :
@@ -83,8 +84,15 @@ class TRP_Shortcode
             const root = document.getElementById(<?php echo wp_json_encode($container_id); ?>);
             if (!root) { return; }
             const ajaxUrl = <?php echo wp_json_encode($ajax_url); ?>;
-            const nonce = <?php echo wp_json_encode($nonce); ?>;
             const tableContent = root.querySelector('#results-table-content');
+
+            function getFreshNonce(){
+                const fd = new FormData();
+                fd.append('action', 'trp_get_results_nonce');
+                return fetch(ajaxUrl,{method:'POST',body:fd,credentials:'same-origin'})
+                    .then(r=>r.json())
+                    .then(payload=> payload && payload.success && payload.data && payload.data.nonce ? payload.data.nonce : '');
+            }
 
             function bindHandlers(){
                 root.querySelectorAll('.season-filter').forEach(el => {
@@ -110,13 +118,16 @@ class TRP_Shortcode
             }
 
             function postData(payload){
-                const fd = new FormData();
-                Object.keys(payload).forEach(k=>fd.append(k,payload[k]));
-                return fetch(ajaxUrl,{method:'POST',body:fd,credentials:'same-origin'}).then(r=>r.text());
+                return getFreshNonce().then(nonce=>{
+                    const fd = new FormData();
+                    Object.keys(payload).forEach(k=>fd.append(k,payload[k]));
+                    fd.append('security', nonce);
+                    return fetch(ajaxUrl,{method:'POST',body:fd,credentials:'same-origin'}).then(r=>r.text());
+                });
             }
 
             function loadCategoriesAndTable(seasonId){
-                postData({action:'get_class_results', mode:'categories', season_id:seasonId, security:nonce}).then(html=>{
+                postData({action:'get_class_results', mode:'categories', season_id:seasonId}).then(html=>{
                     root.querySelector('.class-filters-top3').innerHTML = html;
                     root.dataset.seasonId = seasonId;
                     const first = root.querySelector('.class-filter-top3');
@@ -130,7 +141,7 @@ class TRP_Shortcode
             function loadTable(seasonId, categoryId){
                 root.dataset.seasonId = seasonId;
                 root.dataset.categoryId = categoryId;
-                postData({action:'get_class_results', mode:'table', season_id:seasonId, category_id:categoryId, security:nonce}).then(html=>{
+                postData({action:'get_class_results', mode:'table', season_id:seasonId, category_id:categoryId}).then(html=>{
                     tableContent.innerHTML = html;
                 });
             }
@@ -145,7 +156,11 @@ class TRP_Shortcode
 
     public static function ajax_get_class_results()
     {
-        // Read-only endpoint: do not hard-fail by nonce to avoid cached-page mismatches.
+        $nonce_value = isset($_POST['security']) ? sanitize_text_field(wp_unslash($_POST['security'])) : '';
+        if (!$nonce_value || !wp_verify_nonce($nonce_value, 'trp_results_ajax_nonce')) {
+            wp_die('Security check failed');
+        }
+
         $mode = isset($_POST['mode']) ? sanitize_key(wp_unslash($_POST['mode'])) : 'table';
         $season_id = isset($_POST['season_id']) ? absint($_POST['season_id']) : 0;
 
@@ -157,6 +172,13 @@ class TRP_Shortcode
         $category_id = isset($_POST['category_id']) ? absint($_POST['category_id']) : 0;
         echo self::render_results_table($season_id, $category_id); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         wp_die();
+    }
+
+    public static function ajax_get_results_nonce()
+    {
+        wp_send_json_success([
+            'nonce' => wp_create_nonce('trp_results_ajax_nonce'),
+        ]);
     }
 
     private static function render_category_filters($season_id)
