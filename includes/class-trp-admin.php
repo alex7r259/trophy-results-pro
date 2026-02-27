@@ -36,8 +36,8 @@ class TRP_Admin
     public static function register_menu()
     {
         add_menu_page(
-            __('Trophy', 'trp'),
-            __('Trophy', 'trp'),
+            __('Трофи', 'trp'),
+            __('Трофи', 'trp'),
             'trp_manage_data',
             'trp-dashboard',
             [__CLASS__, 'render_page'],
@@ -49,7 +49,7 @@ class TRP_Admin
     public static function render_page()
     {
         if (!current_user_can('trp_manage_data')) {
-            wp_die(__('Insufficient permissions', 'trp'));
+            wp_die(__('Недостаточно прав', 'trp'));
         }
 
         $tab = isset($_GET['tab']) ? sanitize_key($_GET['tab']) : 'results';
@@ -87,7 +87,7 @@ class TRP_Admin
     public static function delete_row()
     {
         if (!current_user_can('trp_manage_data')) {
-            wp_die(__('Insufficient permissions', 'trp'));
+            wp_die(__('Недостаточно прав', 'trp'));
         }
 
         check_admin_referer('trp_delete_row');
@@ -116,7 +116,7 @@ class TRP_Admin
     public static function update_season_status()
     {
         if (!current_user_can('trp_manage_data')) {
-            wp_die(__('Insufficient permissions', 'trp'));
+            wp_die(__('Недостаточно прав', 'trp'));
         }
 
         check_admin_referer('trp_update_season_status');
@@ -148,7 +148,7 @@ class TRP_Admin
     public static function update_event_status()
     {
         if (!current_user_can('trp_manage_data')) {
-            wp_die(__('Insufficient permissions', 'trp'));
+            wp_die(__('Недостаточно прав', 'trp'));
         }
 
         check_admin_referer('trp_update_event_status');
@@ -176,7 +176,7 @@ class TRP_Admin
     public static function update_result_status()
     {
         if (!current_user_can('trp_manage_data')) {
-            wp_die(__('Insufficient permissions', 'trp'));
+            wp_die(__('Недостаточно прав', 'trp'));
         }
 
         check_admin_referer('trp_update_result_status');
@@ -213,7 +213,7 @@ class TRP_Admin
     public static function save_season()
     {
         if (!current_user_can('trp_manage_data')) {
-            wp_die(__('Insufficient permissions', 'trp'));
+            wp_die(__('Недостаточно прав', 'trp'));
         }
         check_admin_referer('trp_save_season');
 
@@ -247,7 +247,7 @@ class TRP_Admin
     public static function save_event()
     {
         if (!current_user_can('trp_manage_data')) {
-            wp_die(__('Insufficient permissions', 'trp'));
+            wp_die(__('Недостаточно прав', 'trp'));
         }
         check_admin_referer('trp_save_event');
 
@@ -283,7 +283,7 @@ class TRP_Admin
     public static function save_participant()
     {
         if (!current_user_can('trp_manage_data')) {
-            wp_die(__('Insufficient permissions', 'trp'));
+            wp_die(__('Недостаточно прав', 'trp'));
         }
         check_admin_referer('trp_save_participant');
 
@@ -313,7 +313,7 @@ class TRP_Admin
     public static function save_category()
     {
         if (!current_user_can('trp_manage_data')) {
-            wp_die(__('Insufficient permissions', 'trp'));
+            wp_die(__('Недостаточно прав', 'trp'));
         }
         check_admin_referer('trp_save_category');
 
@@ -341,7 +341,7 @@ class TRP_Admin
     public static function save_points()
     {
         if (!current_user_can('trp_manage_data')) {
-            wp_die(__('Insufficient permissions', 'trp'));
+            wp_die(__('Недостаточно прав', 'trp'));
         }
         check_admin_referer('trp_save_points');
 
@@ -386,7 +386,7 @@ class TRP_Admin
     public static function save_season_settings()
     {
         if (!current_user_can('trp_manage_data')) {
-            wp_die(__('Insufficient permissions', 'trp'));
+            wp_die(__('Недостаточно прав', 'trp'));
         }
         check_admin_referer('trp_save_season_settings');
 
@@ -437,7 +437,7 @@ class TRP_Admin
     public static function save_result()
     {
         if (!current_user_can('trp_manage_data')) {
-            wp_die(__('Insufficient permissions', 'trp'));
+            wp_die(__('Недостаточно прав', 'trp'));
         }
 
         check_admin_referer('trp_save_result');
