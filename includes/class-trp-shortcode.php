@@ -32,7 +32,7 @@ class TRP_Shortcode
         }
 
         $events = $wpdb->get_results($wpdb->prepare(
-            "SELECT id, name, stage_number, coefficient FROM " . TRP_DB::table('events') . " WHERE season_id = %d ORDER BY stage_number ASC",
+            "SELECT id, stage_number, coefficient FROM " . TRP_DB::table('events') . " WHERE season_id = %d ORDER BY stage_number ASC",
             $season_id
         ));
 
@@ -67,31 +67,30 @@ class TRP_Shortcode
         $rows = [];
         foreach ($results as $res) {
             $pilot_id = (int) $res->pilot_id;
+            $event_id = (int) $res->event_id;
 
             if (!isset($rows[$pilot_id])) {
                 $rows[$pilot_id] = [
-                    'pilot_id' => $pilot_id,
                     'pilot_last_name' => $res->pilot_last_name ?: ('#' . $pilot_id),
                     'codriver_last_name' => $res->codriver_last_name ?: '—',
                     'start_number' => $res->start_number ?: '—',
                     'car_name' => $res->car_name ?: '—',
                     'results_by_event' => [],
                     'finish_results' => [],
-                    'total' => 0,
                     'counted_event_ids' => [],
+                    'total' => 0,
                 ];
             }
 
-            $event_id = (int) $res->event_id;
-            $coefficient = isset($event_coefficients[$event_id]) ? $event_coefficients[$event_id] : 1.0;
-            $weighted_points = (int) round(((int) $res->points) * $coefficient);
+            $coef = isset($event_coefficients[$event_id]) ? $event_coefficients[$event_id] : 1.0;
+            $base_points = (int) $res->points;
+            $weighted_points = (int) round($base_points * $coef);
 
             $rows[$pilot_id]['results_by_event'][$event_id] = [
                 'place' => (int) $res->place_number,
-                'points' => $weighted_points,
+                'status' => (string) $res->status,
+                'base_points' => $base_points,
                 'weighted_points' => $weighted_points,
-                'coefficient' => $coefficient,
-                'status' => $res->status,
             ];
 
             if (!empty($res->start_number)) {
@@ -100,13 +99,13 @@ class TRP_Shortcode
             if (!empty($res->car_name)) {
                 $rows[$pilot_id]['car_name'] = $res->car_name;
             }
-            if (!empty($res->codriver_last_name) && $res->codriver_last_name !== '—') {
+            if (!empty($res->codriver_last_name)) {
                 $rows[$pilot_id]['codriver_last_name'] = $res->codriver_last_name;
             }
 
             if ($res->status === 'finish') {
                 $rows[$pilot_id]['finish_results'][] = [
-                    'event_id' => (int) $res->event_id,
+                    'event_id' => $event_id,
                     'points' => $weighted_points,
                 ];
             }
@@ -122,11 +121,11 @@ class TRP_Shortcode
                 $counted = array_slice($counted, 0, (int) $settings->best_events_count);
             }
 
-            $row['counted_event_ids'] = array_map(static function ($r) {
-                return (int) $r['event_id'];
+            $row['counted_event_ids'] = array_map(static function ($e) {
+                return (int) $e['event_id'];
             }, $counted);
-            $row['total'] = array_sum(array_map(static function ($r) {
-                return (int) $r['points'];
+            $row['total'] = array_sum(array_map(static function ($e) {
+                return (int) $e['points'];
             }, $counted));
         }
         unset($row);
@@ -138,48 +137,66 @@ class TRP_Shortcode
         ob_start();
         ?>
         <style>
-            .trp-standings-table{width:100%;border-collapse:collapse}
-            .trp-standings-table th,.trp-standings-table td{border:1px solid #ddd;padding:6px}
+            .trp-table-responsive{overflow-x:auto;-webkit-overflow-scrolling:touch}
+            .trp-standings-table{width:100%;min-width:980px;border-collapse:collapse}
+            .trp-standings-table th,.trp-standings-table td{border:1px solid #ddd;padding:6px;text-align:center;white-space:nowrap}
             .trp-counted-stage{background:#e8f5e9;font-weight:600}
+            .trp-fio{text-align:left;white-space:normal}
+            @media (max-width: 768px){
+                .trp-standings-table{font-size:12px}
+            }
         </style>
-        <table class="trp-standings-table">
-            <thead>
-                <tr>
-                    <th><?php esc_html_e('Место', 'trp'); ?></th>
-                    <th><?php esc_html_e('Стартовый номер', 'trp'); ?></th>
-                    <th><?php esc_html_e('Фамилия Пилот/Штурман', 'trp'); ?></th>
-                    <th><?php esc_html_e('Автомобиль', 'trp'); ?></th>
-                    <?php foreach ($events as $event) : ?>
-                        <th><?php echo esc_html($event->stage_number . ' этап x' . (isset($event->coefficient) ? (float) $event->coefficient : 1)); ?></th>
-                    <?php endforeach; ?>
-                    <th><?php esc_html_e('Итог', 'trp'); ?></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($rows as $index => $row) : ?>
+        <div class="trp-table-responsive">
+            <table class="trp-standings-table">
+                <thead>
                     <tr>
-                        <td><?php echo esc_html($index + 1); ?></td>
-                        <td><?php echo esc_html($row['start_number']); ?></td>
-                        <td><?php echo esc_html($row['pilot_last_name'] . ' / ' . $row['codriver_last_name']); ?></td>
-                        <td><?php echo esc_html($row['car_name']); ?></td>
+                        <th rowspan="2"><?php esc_html_e('Место', 'trp'); ?></th>
+                        <th rowspan="2"><?php esc_html_e('Стартовый номер', 'trp'); ?></th>
+                        <th rowspan="2"><?php esc_html_e('Фамилия Пилот/Штурман', 'trp'); ?></th>
+                        <th rowspan="2"><?php esc_html_e('Автомобиль', 'trp'); ?></th>
                         <?php foreach ($events as $event) :
-                            $event_id = (int) $event->id;
-                            $event_result = isset($row['results_by_event'][$event_id]) ? $row['results_by_event'][$event_id] : null;
-                            $is_counted = in_array($event_id, $row['counted_event_ids'], true);
-                            ?>
-                            <td class="<?php echo $is_counted ? 'trp-counted-stage' : ''; ?>">
-                                <?php if ($event_result) : ?>
-                                    <?php echo esc_html($event_result['place'] . ' / ' . $event_result['weighted_points']); ?>
-                                <?php else : ?>
-                                    —
-                                <?php endif; ?>
-                            </td>
+                            $coef = rtrim(rtrim((string) ((float) $event->coefficient), '0'), '.'); ?>
+                            <th colspan="2"><?php echo esc_html($event->stage_number . ' этап'); ?><br><?php echo esc_html('x' . $coef); ?></th>
                         <?php endforeach; ?>
-                        <td><strong><?php echo esc_html($row['total']); ?></strong></td>
+                        <th rowspan="2"><?php esc_html_e('Итог', 'trp'); ?></th>
                     </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+                    <tr>
+                        <?php foreach ($events as $event) : ?>
+                            <th><?php esc_html_e('Место', 'trp'); ?></th>
+                            <th><?php esc_html_e('Баллы', 'trp'); ?></th>
+                        <?php endforeach; ?>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($rows as $rank => $row) : ?>
+                        <tr>
+                            <td><?php echo esc_html($rank + 1); ?></td>
+                            <td><?php echo esc_html($row['start_number']); ?></td>
+                            <td class="trp-fio"><?php echo esc_html($row['pilot_last_name'] . ' / ' . $row['codriver_last_name']); ?></td>
+                            <td><?php echo esc_html($row['car_name']); ?></td>
+                            <?php foreach ($events as $event) :
+                                $event_id = (int) $event->id;
+                                $result = isset($row['results_by_event'][$event_id]) ? $row['results_by_event'][$event_id] : null;
+                                $is_counted = in_array($event_id, $row['counted_event_ids'], true);
+                                $cell_class = $is_counted ? 'trp-counted-stage' : '';
+                                ?>
+                                <td class="<?php echo esc_attr($cell_class); ?>">
+                                    <?php echo $result ? esc_html($result['place']) : '—'; ?>
+                                </td>
+                                <td class="<?php echo esc_attr($cell_class); ?>">
+                                    <?php if ($result) : ?>
+                                        <?php echo esc_html($result['base_points'] . ' (' . $result['weighted_points'] . ')'); ?>
+                                    <?php else : ?>
+                                        —
+                                    <?php endif; ?>
+                                </td>
+                            <?php endforeach; ?>
+                            <td><strong><?php echo esc_html($row['total']); ?></strong></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
         <?php
 
         return ob_get_clean();

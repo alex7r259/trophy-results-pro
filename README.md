@@ -38,11 +38,12 @@ Standings table includes:
 - Start number
 - Pilot/Co-driver surname
 - Car
-- Every season event column: `Place/Weighted points` (points × stage coefficient)
-- Highlighted counted stages for `best_n`
-- Total weighted points
+- Every season event is split into two columns: `Place` and `Points` (`base(weighted)` where weighted = base × coefficient).
+- Counted stages for `best_n` are highlighted in green
+- Total weighted points (sum of counted stages)
 
 If `season` is omitted, shortcode uses current active season.
+Table is responsive via horizontal scroll on mobile.
 
 ## Notes
 
